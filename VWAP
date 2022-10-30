@@ -1,0 +1,52 @@
+//@version=5
+strategy("VWAP_XXIV_CLONE", overlay=true, currency = currency.USDT, initial_capital = 1000, commission_type = strategy.commission.percent, commission_value = 0.0075)
+
+size = 1000/close
+start = timestamp(2022,09,01,0,0)
+end = timestamp(2022,10,30,0,0)
+
+periodt = input(328, "Period")
+vwap328 = ta.vwma(close, periodt)
+vwap_close_pct = (close - vwap328) / close * 100
+
+    
+green = close > open
+red = close < open
+undefined = close == open
+
+//if green
+   // up_wick = high - close
+    //lw_wick = open - low
+//else if red
+    //up_wick = high - open
+    //lw_wick = close - low
+        
+green_strong = close > high[1] and close > high[2]
+red_strong = close < low[1] and  close < low[2] 
+
+//LONG BABY
+long_condition = close > vwap328 and vwap_close_pct >= 0.25 and vwap_close_pct <= 0.57 
+
+if (long_condition and green and green_strong and time >= start and time <= end) 
+    tp_long = vwap328 + (vwap328*0.02)
+    sl_long = vwap328 - (vwap328*0.025)
+    strategy.entry("long", strategy.long, qty=size)
+    if close > vwap328 
+        strategy.exit("exit_long","long", qty = size, profit = tp_long, stop = sl_long)
+
+
+
+//SHORT BABY
+short_condition = close < vwap328 and vwap_close_pct <= -0.025 and vwap_close_pct >= -0.5
+if short_condition and red and red_strong and time >= start and time <= end
+    tp_short = vwap328 - (vwap328*0.015)
+    sl_short = vwap328 + (vwap328*0.010)
+    strategy.entry("short", strategy.short, qty=size)
+    strategy.exit("exit_short", "short", qty=size, profit=tp_short, stop=sl_short)
+
+plot(vwap328, "VWAP", color.rgb(60, 248, 255), 1, plot.style_line)
+
+
+
+
+
