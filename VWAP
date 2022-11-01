@@ -2,11 +2,12 @@
 strategy("VWAP_XXIV_CLONE", overlay=true, currency = currency.USDT, initial_capital = 1000, commission_type = strategy.commission.percent, commission_value = 0.0075)
 
 size = 1000/close
-start = timestamp(2022,09,01,0,0)
-end = timestamp(2022,10,30,0,0)
+Anfangszeit = input.time(timestamp("1 Aug 2021 00:00 +0000"), "From")
+Endezeit = input.time(timestamp("1 Aug 2022 00:00 +0000"), "Till")
 
-periodt = input(328, "Period")
-vwap328 = ta.vwma(close, periodt)
+
+Length = input(328, "VWAP Length")
+vwap328 = ta.vwma(close, Length)
 vwap_close_pct = (close - vwap328) / close * 100
 
     
@@ -27,7 +28,7 @@ red_strong = close < low[1] and  close < low[2]
 //LONG BABY
 long_condition = close > vwap328 and vwap_close_pct >= 0.25 and vwap_close_pct <= 0.57 
 
-if (long_condition and green and green_strong and time >= start and time <= end) 
+if (long_condition and green and green_strong and time >= Anfangszeit and time <= Endezeit) 
     tp_long = vwap328 + (vwap328*0.02)
     sl_long = vwap328 - (vwap328*0.025)
     strategy.entry("long", strategy.long, qty=size)
@@ -38,7 +39,7 @@ if (long_condition and green and green_strong and time >= start and time <= end)
 
 //SHORT BABY
 short_condition = close < vwap328 and vwap_close_pct <= -0.025 and vwap_close_pct >= -0.5
-if short_condition and red and red_strong and time >= start and time <= end
+if short_condition and red and red_strong and time >= Anfangszeit and time <= Endezeit
     tp_short = vwap328 - (vwap328*0.015)
     sl_short = vwap328 + (vwap328*0.010)
     strategy.entry("short", strategy.short, qty=size)
