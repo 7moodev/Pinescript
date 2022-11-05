@@ -1,49 +1,45 @@
 //@version=5
 strategy("VWAP_XXIV_CLONE", overlay=true, currency = currency.USDT, initial_capital = 1000, commission_type = strategy.commission.percent, commission_value = 0.0075)
 
-size = 1000/close
-Anfangszeit = input.time(timestamp("1 Aug 2021 00:00 +0000"), "From")
-Endezeit = input.time(timestamp("1 Aug 2022 00:00 +0000"), "Till")
-
+size = 500/close
+start_ = input.time(timestamp("1 Aug 2021 00:00 +0000"), "From")
+end_ = input.time(timestamp("1 Aug 2022 00:00 +0000"), "Till")
+time_ = time >= start_ and end_ <= time
+long_tp = input(1.5, "Long TP in %")
+long_sl = input(2.5, "Long SL in %")
+short_tp = input(2.5, "Short TP in %")
+short_sl = input(2.5, "SHORT SL in %")
 
 Length = input(328, "VWAP Length")
 vwap328 = ta.vwma(close, Length)
 vwap_close_pct = (close - vwap328) / close * 100
 
-    
-green = close > open
-red = close < open
-undefined = close == open
-
-//if green
-   // up_wick = high - close
-    //lw_wick = open - low
-//else if red
-    //up_wick = high - open
-    //lw_wick = close - low
-        
-green_strong = close > high[1] and close > high[2]
-red_strong = close < low[1] and  close < low[2] 
-
+  
 //LONG BABY
-long_condition = close > vwap328 and vwap_close_pct >= 0.25 and vwap_close_pct <= 0.57 
+green = close > open
+green_strong = close > high[1] and close > high[2]
+long_condition = close > vwap328 and vwap_close_pct >= 0.25 and vwap_close_pct <= 0.57
+break_up = close[1] < vwap328 
+if (long_condition and green and green_strong and time_ and break_up and strategy.position_size >=0)
+    tp_long = vwap328 * ((long_tp/100)+1)
+    sl_long = vwap328 * (1-(long_sl/100))
 
-if (long_condition and green and green_strong and time >= Anfangszeit and time <= Endezeit) 
-    tp_long = vwap328 + (vwap328*0.02)
-    sl_long = vwap328 - (vwap328*0.025)
     strategy.entry("long", strategy.long, qty=size)
     if close > vwap328 
-        strategy.exit("exit_long","long", qty = size, profit = tp_long, stop = sl_long)
+        strategy.exit("exit_long","long", qty = size, limit= tp_long, stop = sl_long)
 
 
 
 //SHORT BABY
+red = close < open
+red_strong = close < low[1] and  close < low[2] 
+break_down = close[1] > vwap328 
 short_condition = close < vwap328 and vwap_close_pct <= -0.025 and vwap_close_pct >= -0.5
-if short_condition and red and red_strong and time >= Anfangszeit and time <= Endezeit
-    tp_short = vwap328 - (vwap328*0.015)
-    sl_short = vwap328 + (vwap328*0.010)
+if short_condition and red and red_strong and time_ and break_down and strategy.position_size >=0
     strategy.entry("short", strategy.short, qty=size)
-    strategy.exit("exit_short", "short", qty=size, profit=tp_short, stop=sl_short)
+    tp_short = vwap328 * (1-(short_tp/100))
+    sl_short = vwap328 * ((short_sl/100)+1)
+    strategy.exit("exit short", "short", qty=size, limit = tp_short, stop=sl_short)
 
 plot(vwap328, "VWAP", color.rgb(60, 248, 255), 1, plot.style_line)
 
