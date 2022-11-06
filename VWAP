@@ -34,7 +34,7 @@ if (long_condition and green and green_strong and time_ and break_up and strateg
 red = close < open
 red_strong = close < low[1] and  close < low[2] 
 break_down = close[1] > vwap328 
-short_condition = close < vwap328 and vwap_close_pct <= -0.025 and vwap_close_pct >= -0.5
+short_condition = close < vwap328 and vwap_close_pct <= -0.25 and vwap_close_pct >= -0.5
 if short_condition and red and red_strong and time_ and break_down and strategy.position_size >=0
     strategy.entry("short", strategy.short, qty=size)
     tp_short = vwap328 * (1-(short_tp/100))
